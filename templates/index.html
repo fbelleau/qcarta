@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset='utf-8' />
+<title>QCarta</title>
+<meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+<!--<script src='https://npmcdn.com/@turf/turf/turf.min.js'></script>-->
+<!--<script src="{{ url_for('static', filename='corslite.js') }}"></script>-->
+<script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.53.0/mapbox-gl.js'></script>
+<link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.53.0/mapbox-gl.css' rel='stylesheet' />
+<link rel="stylesheet" href="{{ url_for('static', filename='jstree.css') }}" />
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+<script src="{{ url_for('static', filename='jstree.js') }}"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" rel="stylesheet"/>
+</head>
+
+<body>
+
+<div id="sidebar">
+
+<div class="title">
+<h1 id="title-1">QCarta <i>!</i></h1>
+<h1 id="title-2">QCarta <i>!</i></h1>
+</div>
+
+<nav id="layersMenu"></nav>
+</div>
+
+<div id='map'></div>
+ 
+<script>
+
+function gatherSelectableLayers (node, layers = []) {
+	var node = $('#layersMenu').jstree('get_node', node)
+	for (var i = 0; i < node.children_d.length; i++) {
+		var node_d = $('#layersMenu').jstree('get_node', node.children_d[i])
+		if (node_d.data['type'] === 'layer') {
+			layers.push([node_d.id, node_d.data['has_band'], node_d.data['has_label']])
+		}
+	}
+	return layers
+}
+
+function gatherVisibleLayers (map, layers) {
+	var visibleLayers = []
+	for (var i = 0; i < layers.length; i++) {
+		layer_cleaned = layers[i][0].toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\//g, '-')
+		if (map.getLayoutProperty(layer_cleaned, 'visibility') === 'visible') {
+			visibleLayers.push(layers[i][0])
+		}
+	}
+	return visibleLayers
+}
+
+function waitForSource(e) {
+	if (e.isSourceLoaded) {
+		$('.jstree-checkbox:not(.jstree-checkbox-disabled)').css('display', 'inline-block') //show boxes
+		$('i.loading').remove()
+		map.off('sourcedata', waitForSource)
+	}
+}
+
+function changeVisibility (e, data) {
+	$('.jstree-checkbox').css('display', 'none') //hide boxes
+	$("<i class='loading'>&nbsp;</i>").insertBefore($('.jstree-checkbox:not(.jstree-checkbox-disabled)'))
+	map.on('sourcedata', waitForSource)
+	var selectedLayers = []
+	for (var i = 0; i < data.selected.length; i++) {
+		var node = data.instance.get_node(data.selected[i])
+		if (node.data['type'] === 'layer') {
+			selectedLayers.push(node.id)
+		}
+	}
+	for (var i = 0; i < selectableLayers.length; i++) {
+		layer_cleaned = selectableLayers[i][0].toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\//g, '-')
+		if (map.getLayoutProperty(layer_cleaned, 'visibility') === 'visible' && !selectedLayers.includes(selectableLayers[i][0])) {
+			map.setLayoutProperty(layer_cleaned, 'visibility', 'none')
+			if (selectableLayers[i][1] === true) { map.setLayoutProperty(layer_cleaned + ' - band', 'visibility', 'none') }
+			if (selectableLayers[i][2] === true) { map.setLayoutProperty(layer_cleaned + ' - label', 'visibility', 'none') }
+		}
+		if (map.getLayoutProperty(layer_cleaned, 'visibility') !== 'visible' && selectedLayers.includes(selectableLayers[i][0])) {
+			map.setLayoutProperty(layer_cleaned, 'visibility', 'visible')
+			if (selectableLayers[i][1] === true) { map.setLayoutProperty(layer_cleaned + ' - band', 'visibility', 'visible') }
+			if (selectableLayers[i][2] === true) { map.setLayoutProperty(layer_cleaned + ' - label', 'visibility', 'visible') }
+		}
+	}
+}
+
+function showPoly (e, data) {
+	var overSelected = data.selected.filter(n => ![data.node.id].includes(n))
+	$('#layersMenu').jstree('deselect_node', overSelected)
+	if (polyLayer != null) {
+		map.removeLayer(polyLayer)
+		map.removeSource(polyLayer)
+		polyLayer = null
+		popup.remove()
+	}
+	if (data.node.data['type'] === 'poly') {
+		polyLayer = data.node.id
+		$.getJSON("{{ url_for('api.shape_info') }}", {"id": polyLayer}, function (result) {
+			layer = {'id': result['id'], 'type': 'fill', 'source': {'type': 'geojson', 'data': "{{ url_for('api.shape_geom') }}" + '?id=' + result['id']}, 'layout': {}, 'paint': {'fill-color': '#088', 'fill-opacity': 0.5} }
+			map.addLayer(layer)
+			var zoom = 13.0688*Math.pow(result['area'], -0.0513)
+			map.flyTo({duration:  Math.floor((Math.random() * 5000) + 2000), center: result['centroid'], bearing:  Math.floor((Math.random() * 359)), zoom: zoom, pitch:  Math.floor((Math.random() * 60)) })
+			popup = new mapboxgl.Popup({closeOnClick: false})
+				.setLngLat(result['centroid'])
+				.setHTML('<strong>' + result['name'] + '</strong><br>Responsable: ' + result['resp'] + '<br>Date de cr&eacute;ation: ' + result['date_cr'] + '<br>Superficie: ' + result['area'] + 'km&sup2;')
+				.addTo(map)
+			$("button.mapboxgl-popup-close-button").on('click', function(event){
+			    $('#layersMenu').jstree('deselect_all')
+			    map.easeTo({bearing: 0, pitch: 0 })
+				if (polyLayer != null) {
+					map.removeLayer(polyLayer)
+					map.removeSource(polyLayer)
+					polyLayer = null
+				}
+			})
+		})
+	} else {
+		map.easeTo({bearing: 0, pitch: 0 })
+	}
+}
+
+$('#layersMenu').jstree({'plugins':["wholerow", "checkbox"], checkbox: {whole_node: false, tie_selection: false}, 
+	'core' : { 'data' : {'url': "{{ url_for('api.menu') }}", 'data': function (node) { return { "id" : node.id, "type" : (typeof node.data !== 'undefined') ? node.data['type'] : 'root' } } }, 'themes' : {'variant': 'small'}}});
+
+selectableLayers = []
+polyLayer = null
+popup = null
+
+// hide boxes
+$('#layersMenu').on('loaded.jstree', function(e, data) {
+	$('.jstree-checkbox').css('display', 'none')
+	$("<i class='loading'>&nbsp;</i>").insertBefore($('.jstree-checkbox:not(.jstree-checkbox-disabled)'))
+})
+.on('load_node.jstree', function(e, data) {
+	selectableLayers = gatherSelectableLayers(data.node, selectableLayers)
+})
+.on('check_node.jstree uncheck_node.jstree', changeVisibility)
+.on('open_node.jstree', function () {
+    let bar = $(this).find('.jstree-wholerow-clicked')
+    bar.css('height',
+        bar.parent().children('a.jstree-anchor').height() + 'px')
+})
+.on('hover_node.jstree', function () {
+    var bar = $(this).find('.jstree-wholerow-hovered')
+    bar.css('height',
+        bar.parent().children('a.jstree-anchor').height() + 'px')
+})
+.on('select_node.jstree', showPoly)
+
+mapboxgl.accessToken = '{{ config.MAPBOXGL_API_KEY }}'
+
+var bounds = [ [-80, 44.5], [-57, 63] ] // SW, NE
+var map = new mapboxgl.Map({
+			container: 'map',
+			style: 'mapbox://styles/pheel/cjs91kn1a29ux1fnurtut8n20',
+			center: [-72.215922, 46.805884],
+			zoom: 9.0,
+			attributionControl: false,
+			maxBounds: bounds
+			})
+
+// show boxes
+map.on('load', function () {
+	var visibleLayers = gatherVisibleLayers(map, selectableLayers)
+	$('#layersMenu').jstree('check_node', visibleLayers)
+	$('.jstree-checkbox:not(.jstree-checkbox-disabled)').css('display', 'inline-block')
+	$('i.loading').remove()
+})
+
+map.addControl(new mapboxgl.NavigationControl())
+map.addControl(new mapboxgl.ScaleControl({position: 'bottom-right'}))
+
+</script>
+ 
+</body>
+</html>

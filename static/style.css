@@ -1,0 +1,136 @@
+@font-face {
+    font-family: DDINCondensed;
+    src: url('fonts/D-DINCondensed-Bold.otf') format("opentype");
+    font-weight: bold;
+}
+@font-face {
+    font-family: DDINCondensed;
+    src: url('fonts/D-DINCondensed.otf') format("opentype");
+    font-weight: normal;
+}
+@font-face {
+    font-family: DDIN;
+    src: url('fonts/D-DIN-Bold.otf') format("opentype");
+    font-weight: bold;
+}
+@font-face {
+    font-family: DDIN;
+    src: url('fonts/D-DIN.otf') format("opentype");
+    font-weight: normal;
+}
+html {height: 95%;}
+body {
+	margin:0; padding:0; 
+	background-color: #fefee1;
+	height: 100%;
+}
+#sidebar {
+	width: 250px;
+	height: 100%;
+}
+#layersMenu {
+	position: relative;
+	top: 60px;
+	font-family: DDIN;
+	margin-left: 0px;
+	font-size: 11px;
+	height: calc(100% - 150px);
+	overflow-y: auto;
+	overflow-x: hidden;
+}
+.title {
+	position: relative;
+	left: 10px;
+	top: -10px;
+	font-family: DDINCondensed;
+	font-size: 36px;
+}
+.title > h1 {
+	font-weight: bold;
+}
+#title-1 {
+	position: absolute;
+	color: #feda48;
+	left: 25px;
+}
+#title-2 {
+	position: absolute;
+	color: #000000;
+	left: 0px;
+}
+#map {
+		position: fixed; 
+		top:0;
+		bottom:0;
+		left: 250px;
+		width: calc(100% - 250px);
+	}
+.park-green1 {
+	color: #94da72;
+}
+
+.park-green2 {
+	color: #b6e59e;
+}
+
+.park-yellow1 {
+	color: #c8da72;
+}
+
+.park-yellow2 {
+	color: #d9e59e;
+}
+
+.prive-gris {
+	color: #dbdbbd;
+}
+
+.autochtone-orange {
+	color: #fbe36a;
+}
+
+.gouv-jaune {
+	color: #fbfb6a;
+}
+
+.residuel-rouge {
+	color: #df8686;
+}
+
+.jstree-default .jstree-checkbox-disabled {
+	display: none;
+}
+
+/*.jstree-default .jstree-open > .jstree-ocl {
+  background-image: none;
+}
+.jstree-default .jstree-closed > .jstree-ocl {
+  background-image: none;
+}*/
+.jstree-default .jstree-wholerow-hovered {
+  background: #fff9c4;
+}
+.jstree-default .jstree-wholerow-clicked {
+  background: #fff59d;
+}
+
+.loading {
+	display: inline-block;
+	width: 16px;
+	background: url("throbber.gif") center center no-repeat;
+}
+
+.jstree-anchor {
+    /*enable wrapping*/
+    white-space : normal !important;
+    /*ensure lower nodes move down*/
+    height : auto !important;
+    /*offset icon width*/
+    padding-right : 24px;
+}
+
+.mapboxgl-popup {
+	max-width: 400px;
+	font-family: DDIN;
+	font-size: 14px;
+}

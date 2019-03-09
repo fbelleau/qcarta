@@ -1,0 +1,55 @@
+[
+	{
+		"text" : "&nbsp;Récréation",
+		"id" : "recreation",
+		"data": {"type": "theme"},
+		"children" : [
+			{ "text" : "Parcs nationaux", "id": "Parc national", "children": true, "data": {"type": "layer", "has_band": true, "has_label": true}, "icon": "glyphicon glyphicon-file glyphicon-stop park-green1"},
+			{ "text" : "Réserves fauniques", "id": "Réserve faunique", "children": true, "data": {"type": "layer", "has_band": true, "has_label": true}, "icon": "glyphicon glyphicon-file glyphicon-stop park-green2"},
+			{ "text" : "ZECs", "id": "ZEC", "children": true, "data": {"type": "layer", "has_band": true, "has_label": true}, "icon": "glyphicon glyphicon-file glyphicon-stop park-yellow1"},
+			{ "text" : "Pourvoiries", "id": "Pourvoirie", "children": true, "data": {"type": "layer", "has_band": true, "has_label": true}, "icon": "glyphicon glyphicon-file glyphicon-stop park-yellow2"},
+			{ "text" : "Parcs régionaux", "id": "Parc régional", "children": true, "data": {"type": "layer", "has_band": true, "has_label": true}, "icon": "glyphicon glyphicon-file glyphicon-stop park-green2"}
+		],
+		"state" : { "opened" : true, "disabled": true},
+		"icon": false
+	},
+	{
+		"text" : "Forêts de recherche", "id": "FE/FER/SF", "children": true, "data": {"type": "layer", "has_band": true, "has_label": true}, "icon": "glyphicon glyphicon-file glyphicon-stop park-green2"
+	},
+	{
+		"text": "&nbsp;Domanialité",
+		"id" : "domanialite",
+		"data": {"type": "theme"},
+		"children": [
+			{ "text": "Privé", "id": "Privé", "data": {"type": "layer", "has_band": false, "has_label": false}, "icon": "glyphicon glyphicon-file glyphicon-stop prive-gris"},
+			{ "text": "Territoire autochtone", "id": "Territoire autochtone", "children": true, "data": {"type": "layer", "has_band": true, "has_label": true}, "icon": "glyphicon glyphicon-file glyphicon-stop autochtone-orange"},
+			{ "text": "Gouvernemental", "id": "Gouvernemental", "data": {"type": "layer", "has_band": true, "has_label": false}, "icon": "glyphicon glyphicon-file glyphicon-stop gouv-jaune"},
+			{ "text": "Résiduel libre", "id": "Résiduel libre", "data": {"type": "layer", "has_band": true, "has_label": false}, "icon": "glyphicon glyphicon-file glyphicon-stop residuel-rouge"}
+		],
+		"state" : { "opened" : true, "disabled": true},
+		"icon": false
+	},
+	{
+		"text": "&nbsp;Administration",
+		"id" : "administration",
+		"data": {"type": "theme"},
+		"children": [
+			{
+				"text": "Régions administratives",
+				"id": "#",
+				"data": {"type": "admin"},
+				"children": true,
+				"state": { "opened": false, "checkbox_disabled": true}
+			},
+			{
+				"text": "Communautés métropolitaines",
+				"id": "communautes_metro",
+				"data": {"type": "metro"},
+				"children": true,
+				"state": { "opened": false, "checkbox_disabled": true}
+			}
+		],
+		"state" : { "opened": true, "checkbox_disabled": true},
+		"icon": false
+	}
+]
